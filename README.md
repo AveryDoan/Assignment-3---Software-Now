@@ -10,7 +10,7 @@ The goal is to keep the project structure, ownership, and submission files ready
 
 ## File Ownership Plan
 
-- `main.py` - Avery: application entry point and startup flow
+- `main.py` - Avery + Jane: application entry point and startup flow
 - `game_controller.py` - Avery: coordinates GUI, game logic, and image processing
 - `image_processor.py` - Max: OpenCV image loading, cloning, difference generation, and image marking
 - `game_logic.py` - Alvi: click validation, mistakes, scoring, reveal state, and round rules

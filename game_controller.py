@@ -4,5 +4,3 @@ Owner: Avery
 Responsibility: coordinates the GUI, game logic, and image processing layers.
 Notes: This file will manage round setup, resets, and cross-module communication.
 """
-
-# TODO: implement controller orchestration after interfaces are finalized.

@@ -5,4 +5,3 @@ Responsibility: all OpenCV image work, including loading, cloning, difference ge
 Notes: This file will later hold the image transformation strategies and drawing helpers.
 """
 
-# TODO: implement OpenCV processing after alteration types are approved.

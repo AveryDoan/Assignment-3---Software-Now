@@ -5,4 +5,3 @@ Responsibility: round state, click validation, scoring, mistake handling, reveal
 Notes: This file will later store the rules that decide whether a click is correct.
 """
 
-# TODO: implement game rules after scoring behavior is confirmed.
