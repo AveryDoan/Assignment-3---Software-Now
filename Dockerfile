@@ -5,6 +5,7 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     libsm6 libxext6 libxrender-dev \
+    python3-tk \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python packages
