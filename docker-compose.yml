@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  spot-difference:
+    build: .
+    container_name: spot_difference_game
+    environment:
+      - DISPLAY=host.docker.internal:0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - .:/app
+    stdin_open: true
+    tty: true
