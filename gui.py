@@ -19,7 +19,9 @@ if TYPE_CHECKING:
     from game_controller import GameController
 
 
-# Palettes for light and dark mode
+# Palettes for light and dark mode.
+# Each palette keeps the same roles so the rest of the UI can switch themes
+# without having to know individual colour values.
 LIGHT_THEME = {
     "bg": "#f4f4f6",
     "fg": "#1a1a1a",
@@ -42,15 +44,19 @@ class SpotDifferenceGUI:
     def __init__(self, root: tk.Tk, controller: "GameController") -> None:
         self.root = root
         self.controller = controller
+        # Keep references to PhotoImage objects so Tkinter does not garbage-collect
+        # images that are currently displayed on the canvases.
         self._original_photo: ImageTk.PhotoImage | None = None
         self._modified_photo: ImageTk.PhotoImage | None = None
         self._magnifier_photo: ImageTk.PhotoImage | None = None
+        # These flags mirror the current UI state and gate user actions.
         self._clicks_enabled = False
         self._theme = LIGHT_THEME
         self._dark_mode = False
         self._magnifier_enabled = False
 
-        # State variables
+        # StringVar/BooleanVar objects let Tkinter widgets update automatically
+        # when the controller changes game state.
         self.remaining_var = tk.StringVar(value="Remaining: -")
         self.found_var = tk.StringVar(value="Found: -")
         self.mistakes_var = tk.StringVar(value="Mistakes: -")
@@ -124,7 +130,7 @@ class SpotDifferenceGUI:
 
     def set_banner(self, message: str, mode: str = "info") -> None:
         """Coloured banner above the images. Empty message hides it."""
-        # Palettes mirror semantic colours and contrast well in both themes
+        # Use semantic colours so the banner communicates intent at a glance.
         palette = {
             "info":    ("#1f3a8a", "#dbeafe"),
             "success": ("#065f46", "#d1fae5"),
@@ -156,6 +162,8 @@ class SpotDifferenceGUI:
         self._timer_callback = callback
 
     def start_timer_loop(self) -> None:
+        # The controller provides the actual timer update logic; the GUI keeps
+        # rescheduling this method so the timer continues to refresh.
         if self._timer_callback is not None:
             self._timer_callback()
         self.root.after(100, self.start_timer_loop)
@@ -164,6 +172,8 @@ class SpotDifferenceGUI:
         """Briefly show a green check or red cross at the click position."""
         symbol = "✓" if success else "✗"
         colour = "#16a34a" if success else "#dc2626"
+        # Draw the symbol directly on the canvas so the feedback appears exactly
+        # where the player clicked.
         text_id = self.modified_canvas.create_text(
             x, y,
             text=symbol,
@@ -201,6 +211,7 @@ class SpotDifferenceGUI:
         self.modified_canvas.delete("magnifier")
         if zoomed_bgr is None:
             return
+        # Convert the zoomed image to a Tkinter-compatible object before drawing.
         self._magnifier_photo = self._to_photo(zoomed_bgr)
         # Place in top-right corner with a small inset
         canvas_w = int(self.modified_canvas["width"])
@@ -217,6 +228,7 @@ class SpotDifferenceGUI:
     # ---- build / theme ------------------------------------------------------
 
     def _build_window(self) -> None:
+        # Build the window in sections so the layout stays easy to adjust.
         self.root.title("HIT137 Spot the Difference — Enhanced Edition")
         self.root.geometry("1240x880")
         self.root.minsize(960, 720)
@@ -270,6 +282,7 @@ class SpotDifferenceGUI:
         self.reset_button.grid(row=0, column=3)
 
     def _build_options_row(self) -> None:
+        # This row groups gameplay toggles and the running timer.
         options = ttk.Frame(self.root, padding=(14, 0, 14, 8))
         options.grid(row=1, column=0, sticky="ew")
         options.columnconfigure(3, weight=1)
@@ -309,6 +322,7 @@ class SpotDifferenceGUI:
         )
 
     def _build_counters_row(self) -> None:
+        # Counters show the current round status and score at a glance.
         counters = ttk.Frame(self.root, padding=(14, 0, 14, 8))
         counters.grid(row=2, column=0, sticky="ew")
         for column in range(6):
@@ -336,6 +350,8 @@ class SpotDifferenceGUI:
         self.banner_frame.grid_remove()
 
     def _build_image_area(self) -> None:
+        # The two canvases sit side by side: reference image on the left and
+        # the interactive image on the right.
         image_area = ttk.Frame(self.root, padding=(14, 8, 14, 8))
         image_area.grid(row=4, column=0, sticky="nsew")
         image_area.columnconfigure(0, weight=1)
@@ -394,12 +410,14 @@ class SpotDifferenceGUI:
     def _toggle_dark_mode(self) -> None:
         self._dark_mode = bool(self.dark_mode_var.get())
         self._theme = DARK_THEME if self._dark_mode else LIGHT_THEME
+        # Reapply the current theme so existing widgets update immediately.
         self._apply_theme()
 
     def _apply_theme(self) -> None:
         self.root.configure(bg=self._theme["bg"])
         style = ttk.Style()
-        # Try a theme that respects bg colours; fall back gracefully
+        # Try a theme that respects custom colours; fall back gracefully if the
+        # host platform does not support it.
         try:
             style.theme_use("clam")
         except tk.TclError:
@@ -421,6 +439,8 @@ class SpotDifferenceGUI:
     # ---- drawing helpers ----------------------------------------------------
 
     def _draw_placeholder(self) -> None:
+        # Start with a simple prompt so the empty state is intentional rather
+        # than looking broken.
         for canvas in (self.original_canvas, self.modified_canvas):
             canvas.delete("all")
             canvas.configure(width=520, height=520)
@@ -437,6 +457,7 @@ class SpotDifferenceGUI:
         canvas.create_image(0, 0, anchor=tk.NW, image=photo)
 
     def _to_photo(self, image_bgr: np.ndarray) -> ImageTk.PhotoImage:
+        # OpenCV stores colour channels as BGR, while Pillow/Tk expect RGB.
         image_rgb = image_bgr[:, :, ::-1].copy()
         pil_image = Image.fromarray(image_rgb)
         return ImageTk.PhotoImage(pil_image)
