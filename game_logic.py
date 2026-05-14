@@ -107,7 +107,7 @@ class GameLogic:
         self._round_end: float | None = None
         self._find_times: dict[int, float] = {}  # region_index -> seconds_to_find
 
-    # ---- configuration ------------------------------------------------------
+    # configuration 
 
     def configure(
         self,
@@ -132,7 +132,7 @@ class GameLogic:
         self._round_end = None
         self._find_times.clear()
 
-    # ---- read-only state ----------------------------------------------------
+    # read-only state 
 
     @property
     def regions(self) -> tuple[DifferenceRegion, ...]:
@@ -205,7 +205,7 @@ class GameLogic:
         end = self._round_end or time.monotonic()
         return max(0.0, end - self._round_start)
 
-    # ---- click handling -----------------------------------------------------
+    # click handling 
 
     def handle_click(self, click_x: int, click_y: int) -> ClickResult:
         if not self._regions:
@@ -281,7 +281,7 @@ class GameLogic:
             self._round_end = time.monotonic()
         return self.revealed_regions
 
-    # ---- scoring ------------------------------------------------------------
+    # scoring 
 
     def compute_round_score(self) -> int:
         """Score this round: finds * base − mistakes * 50 − hints * 75
@@ -308,7 +308,7 @@ class GameLogic:
             timings=tuple(timings),
         )
 
-    # ---- private ------------------------------------------------------------
+    # private 
 
     def _find_region(
         self, click_x: int, click_y: int, candidates: Iterable[int]
